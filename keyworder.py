@@ -1,9 +1,11 @@
+import os
 import json
 import urllib
 import config
 from browser import Browser
+from memeclass import MemeClassifier
 
-class BaseKeyworder:
+class BaseKeyworder(object):
     def __init__(self):
         self._br = Browser()
 
@@ -39,6 +41,13 @@ class BaseKeyworder:
         assert success
 
 class MemeKeyworder(BaseKeyworder):
+    def __init__(self):
+        super(MemeKeyworder, self).__init__()
+        self._classifier = MemeClassifier('templates')
+
     def add_keyword(self, gag_id, image_url):
-        self._add_keyword(gag_id, 'deserve')
+        os.system("bash download.sh %s %s" % (gag_id, image_url))
+        which = self._classifier.classify('images/%s.jpg' % gag_id)
+        print gag_id, which
+        self._add_keyword(gag_id, which)
 

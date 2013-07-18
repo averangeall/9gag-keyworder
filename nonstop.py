@@ -1,4 +1,12 @@
+import database
 import keyworder
 
+db = database.Database()
 meme = keyworder.MemeKeyworder()
-meme.add_keyword('axNZQZb', 'http://d24w6bsrhbeh9d.cloudfront.net/photo/axNZQZb_700b.jpg')
+
+while True:
+    gags = db.get_latest_gags(100000)
+    for gag in gags:
+        gag_id = gag[0]
+        content_url = gag[1]
+        meme.add_keyword(gag_id, content_url)
