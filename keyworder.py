@@ -2,6 +2,7 @@ import os
 import re
 import json
 import urllib
+from nltk.stem import SnowballStemmer
 import config
 from browser import Browser
 from memeclass import MemeClassifier
@@ -58,18 +59,21 @@ class VocKeyworder(BaseKeyworder):
     def __init__(self):
         super(VocKeyworder, self).__init__()
         self._vocs = engvoc.voc2000
+        self._stemmer = SnowballStemmer("english")
 
     def add_keyword(self, gag_id, title):
         tokens = title.split()
         for token in tokens:
             token = re.sub(r"\W+$", '', token)
-            voc = re.sub(r"'\w+", '', token).lower()
+            voc = re.sub(r"'\w+", '', token)
+            voc = self._stemmer.stem(voc)
+            voc = voc.lower()
             try:
                 float(voc)
                 continue
             except:
                 pass
             if voc not in self._vocs:
-                print 'voc', token
+                print 'voc', voc, token
                 #self._add_keyword(gag_id, token)
 
