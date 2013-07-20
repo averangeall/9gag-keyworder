@@ -51,7 +51,7 @@ class MemeKeyworder(BaseKeyworder):
         ret = os.system("bash download.sh %s %s" % (gag_id, image_url))
         assert ret == 0
         which = self._classifier.classify('images/%s.jpg' % gag_id)
-        print gag_id, 'meme', which
+        print 'meme', which
         self._add_keyword(gag_id, which)
 
 class VocKeyworder(BaseKeyworder):
@@ -70,6 +70,6 @@ class VocKeyworder(BaseKeyworder):
             except:
                 pass
             if voc not in self._vocs:
-                print gag_id, 'voc', token
+                print 'voc', token
                 #self._add_keyword(gag_id, token)
 
