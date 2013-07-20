@@ -1,11 +1,13 @@
 # -*- coding: utf-8 -*-
 
+import HTMLParser
 import psycopg2
 
 class Database:
     def __init__(self):
         self._conn = psycopg2.connect(database='ninecrawl', host='gardenia.csie.ntu.edu.tw', user='ninegag', password='agent#336')
         self._cursor = self._conn.cursor()
+        self._html = HTMLParser.HTMLParser()
 
     def _add_slashes(self, string):
         string = string.encode('utf8')
@@ -25,6 +27,9 @@ class Database:
                  ORDER BY crawl_time DESC 
                  LIMIT %s''' % num_gags
         self._cursor.execute(cmd)
-        res = self._cursor.fetchall()
+        rows = self._cursor.fetchall()
+        res = []
+        for row in rows:
+            res.append([row[0], self._html.unescape(row[1]), row[2]])
         return res
 
