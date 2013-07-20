@@ -16,7 +16,12 @@ class Database:
     def get_latest_gags(self, num_gags=10):
         cmd = '''SELECT gag_id, title, content_url
                  FROM gag
-                 WHERE crawl_time IS NOT NULL AND title IS NOT NULL
+                 WHERE crawl_time IS NOT NULL
+                       AND title IS NOT NULL
+                       AND (
+                          type = 'IM'
+                          OR type = 'GI'
+                       )
                  ORDER BY crawl_time DESC 
                  LIMIT %s''' % num_gags
         self._cursor.execute(cmd)
