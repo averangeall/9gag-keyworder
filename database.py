@@ -14,7 +14,7 @@ class Database:
         return string
 
     def get_latest_gags(self, num_gags=10):
-        cmd = 'SELECT gag_id, content_url FROM gag ORDER BY crawl_time LIMIT %s' % num_gags
+        cmd = 'SELECT gag_id, title, content_url FROM gag WHERE crawl_time IS NOT NULL ORDER BY crawl_time DESC LIMIT %s' % num_gags
         self._cursor.execute(cmd)
         res = self._cursor.fetchall()
         return res

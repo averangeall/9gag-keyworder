@@ -1,9 +1,11 @@
 import os
+import re
 import json
 import urllib
 import config
 from browser import Browser
 from memeclass import MemeClassifier
+import engvoc
 
 class BaseKeyworder(object):
     def __init__(self):
@@ -46,8 +48,28 @@ class MemeKeyworder(BaseKeyworder):
         self._classifier = MemeClassifier('templates')
 
     def add_keyword(self, gag_id, image_url):
-        os.system("bash download.sh %s %s" % (gag_id, image_url))
+        ret = os.system("bash download.sh %s %s" % (gag_id, image_url))
+        assert ret == 0
         which = self._classifier.classify('images/%s.jpg' % gag_id)
-        print gag_id, which
+        print gag_id, 'meme', which
         self._add_keyword(gag_id, which)
+
+class VocKeyworder(BaseKeyworder):
+    def __init__(self):
+        super(VocKeyworder, self).__init__()
+        self._vocs = engvoc.voc2000
+
+    def add_keyword(self, gag_id, title):
+        tokens = title.split()
+        for token in tokens:
+            token = re.sub(r"\W+$", '', token)
+            voc = re.sub(r"'\w+", '', token).lower()
+            try:
+                float(voc)
+                continue
+            except:
+                pass
+            if voc not in self._vocs:
+                print gag_id, 'voc', token
+                #self._add_keyword(gag_id, token)
 
