@@ -2,7 +2,8 @@ import os
 import re
 import json
 import urllib
-from nltk.stem import SnowballStemmer
+from nltk.stem import WordNetLemmatizer, SnowballStemmer
+from nltk.stem.lancaster import LancasterStemmer
 import config
 from browser import Browser
 from memeclass import MemeClassifier
@@ -59,21 +60,26 @@ class VocKeyworder(BaseKeyworder):
     def __init__(self):
         super(VocKeyworder, self).__init__()
         self._vocs = engvoc.voc2000
-        self._stemmer = SnowballStemmer("english")
+        self._lemmatizer = WordNetLemmatizer()
+        self._stemmer1 = LancasterStemmer()
+        self._stemmer2 = SnowballStemmer('english')
 
     def add_keyword(self, gag_id, title):
         tokens = title.split()
         for token in tokens:
             token = re.sub(r"\W+$", '', token)
-            voc = re.sub(r"'\w+", '', token)
-            voc = self._stemmer.stem(voc)
-            voc = voc.lower()
+            token = re.sub(r"^\W+", '', token)
+            vocs = []
+            vocs.append(re.sub(r"'\w+", '', token).lower())
+            vocs.append(self._lemmatizer.lemmatize(vocs[0]))
+            vocs.append(self._stemmer1.stem(vocs[0]))
+            vocs.append(self._stemmer2.stem(vocs[0]))
             try:
-                float(voc)
+                float(vocs[0])
                 continue
-            except:
+            except ValueError:
                 pass
-            if voc not in self._vocs:
-                print 'voc', voc, token
+            if not any([voc in self._vocs for voc in vocs]):
+                print 'voc', vocs, token
                 #self._add_keyword(gag_id, token)
 
