@@ -81,5 +81,5 @@ class VocKeyworder(BaseKeyworder):
                 pass
             if not any([voc in self._vocs for voc in vocs]):
                 print 'voc', vocs, token
-                #self._add_keyword(gag_id, token)
+                self._add_keyword(gag_id, token)
 
