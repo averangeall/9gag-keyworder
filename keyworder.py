@@ -50,11 +50,12 @@ class MemeKeyworder(BaseKeyworder):
         self._classifier = MemeClassifier('templates')
 
     def add_keyword(self, gag_id, image_url):
-        ret = os.system("bash download.sh %s %s" % (gag_id, image_url))
+        ret = os.system("bash download.sh '%s' '%s'" % (gag_id, image_url))
         assert ret == 0
         which = self._classifier.classify('images/%s.jpg' % gag_id)
-        print 'meme', which
-        self._add_keyword(gag_id, which)
+        if which:
+            print 'meme', which
+            self._add_keyword(gag_id, which)
 
 class VocKeyworder(BaseKeyworder):
     def __init__(self):
@@ -69,11 +70,14 @@ class VocKeyworder(BaseKeyworder):
         for token in tokens:
             token = re.sub(r"\W+$", '', token)
             token = re.sub(r"^\W+", '', token)
+            token = token.encode('utf8')
             vocs = []
             vocs.append(re.sub(r"'\w+", '', token).lower())
             vocs.append(self._lemmatizer.lemmatize(vocs[0]))
             vocs.append(self._stemmer1.stem(vocs[0]))
             vocs.append(self._stemmer2.stem(vocs[0]))
+            if vocs[0] == '':
+                continue
             try:
                 float(vocs[0])
                 continue
