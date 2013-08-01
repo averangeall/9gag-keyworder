@@ -1,5 +1,6 @@
 import mechanize
 import cookielib
+import time
 
 class Browser:
     def __init__(self):
@@ -19,7 +20,15 @@ class Browser:
         self._br.set_handle_refresh(mechanize._http.HTTPRefreshProcessor(), max_time=1)
 
     def _get_page_content(self, url):
-        page = self._br.open(url)
+        okay = False
+        while not okay:
+            try:
+                page = self._br.open(url)
+                okay = True
+            except:
+                print url
+                print 'mechanize error... sleep for 10 seconds'
+                time.sleep(10)
         content = page.read()
         return content
 

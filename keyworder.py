@@ -72,10 +72,13 @@ class VocKeyworder(BaseKeyworder):
             token = re.sub(r"^\W+", '', token)
             token = token.encode('utf8')
             vocs = []
-            vocs.append(re.sub(r"'\w+", '', token).lower())
-            vocs.append(self._lemmatizer.lemmatize(vocs[0]))
-            vocs.append(self._stemmer1.stem(vocs[0]))
-            vocs.append(self._stemmer2.stem(vocs[0]))
+            try:
+                vocs.append(re.sub(r"'\w+", '', token).lower())
+                vocs.append(self._lemmatizer.lemmatize(vocs[0]))
+                vocs.append(self._stemmer1.stem(vocs[0]))
+                vocs.append(self._stemmer2.stem(vocs[0]))
+            except UnicodeDecodeError:
+                continue
             if vocs[0] == '':
                 continue
             try:

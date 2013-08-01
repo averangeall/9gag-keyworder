@@ -6,7 +6,7 @@ voc = keyworder.VocKeyworder()
 meme = keyworder.MemeKeyworder()
 
 while True:
-    gags = db.get_latest_gags(100000)
+    gags = db.get_latest_gags(10)
     for gag in gags:
         print gag
         gag_id = gag[0]
