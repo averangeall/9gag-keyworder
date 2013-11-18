@@ -66,13 +66,13 @@ class VocKeyworder(BaseKeyworder):
         self._stemmer2 = SnowballStemmer('english')
 
     def add_keyword(self, gag_id, title):
-        tokens = title.split()
+        tokens = re.split(' |\.|,|;|=', title)
         for token in tokens:
             token = re.sub(r"\W+$", '', token)
             token = re.sub(r"^\W+", '', token)
-            token = token.encode('utf8')
             vocs = []
             try:
+                token = token.encode('utf8')
                 vocs.append(re.sub(r"'\w+", '', token).lower())
                 vocs.append(self._lemmatizer.lemmatize(vocs[0]))
                 vocs.append(self._stemmer1.stem(vocs[0]))
