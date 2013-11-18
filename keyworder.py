@@ -13,25 +13,12 @@ class BaseKeyworder(object):
     def __init__(self):
         self._br = Browser()
 
-    def _get_word_id(self, gag_id, word_str):
+    def _add_recomm(self, gag_id, word_str, user_id, user_key):
         args = {
             'gag_id': gag_id,
-            'user_id': config.admin_id,
-            'valid_key': config.admin_key,
             'word_str': word_str,
-        }
-        url = 'http://disa.csie.org:5566/lookup/recomm/id/?' + urllib.urlencode(args)
-        content = self._br._get_page_content(url)
-        result = json.loads(content)
-        assert result['status'] == 'OKAY'
-        return result['respond']['id']
-
-    def _add_recomm(self, gag_id, word_id):
-        args = {
-            'gag_id': gag_id,
-            'user_id': config.admin_id,
-            'valid_key': config.admin_key,
-            'word_id': word_id,
+            'user_id': user_id,
+            'valid_key': user_key,
         }
         url = 'http://disa.csie.org:5566/lookup/explain/query/?' + urllib.urlencode(args)
         content = self._br._get_page_content(url)
@@ -39,10 +26,9 @@ class BaseKeyworder(object):
         return result['status'] == 'OKAY'
 
     def _add_keyword(self, gag_id, keyword):
-        word_id = self._get_word_id(gag_id, keyword)
-        assert word_id
-        success = self._add_recomm(gag_id, word_id)
-        assert success
+        for robot in config.robots:
+            success = self._add_recomm(gag_id, keyword, robot[0], robot[1])
+            assert success
 
 class MemeKeyworder(BaseKeyworder):
     def __init__(self):
@@ -50,11 +36,12 @@ class MemeKeyworder(BaseKeyworder):
         self._classifier = MemeClassifier('templates')
 
     def add_keyword(self, gag_id, image_url):
-        ret = os.system("bash download.sh %s %s" % (gag_id, image_url))
+        ret = os.system("bash download.sh '%s' '%s'" % (gag_id, image_url))
         assert ret == 0
         which = self._classifier.classify('images/%s.jpg' % gag_id)
-        print 'meme', which
-        self._add_keyword(gag_id, which)
+        if which:
+            print 'meme', which
+            self._add_keyword(gag_id, which)
 
 class VocKeyworder(BaseKeyworder):
     def __init__(self):
@@ -65,15 +52,21 @@ class VocKeyworder(BaseKeyworder):
         self._stemmer2 = SnowballStemmer('english')
 
     def add_keyword(self, gag_id, title):
-        tokens = title.split()
+        tokens = re.split(' |\.|,|;|=', title)
         for token in tokens:
             token = re.sub(r"\W+$", '', token)
             token = re.sub(r"^\W+", '', token)
             vocs = []
-            vocs.append(re.sub(r"'\w+", '', token).lower())
-            vocs.append(self._lemmatizer.lemmatize(vocs[0]))
-            vocs.append(self._stemmer1.stem(vocs[0]))
-            vocs.append(self._stemmer2.stem(vocs[0]))
+            try:
+                token = token.encode('utf8')
+                vocs.append(re.sub(r"'\w+", '', token).lower())
+                vocs.append(self._lemmatizer.lemmatize(vocs[0]))
+                vocs.append(self._stemmer1.stem(vocs[0]))
+                vocs.append(self._stemmer2.stem(vocs[0]))
+            except UnicodeDecodeError:
+                continue
+            if vocs[0] == '':
+                continue
             try:
                 float(vocs[0])
                 continue
