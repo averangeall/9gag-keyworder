@@ -1,2 +1,4 @@
-admin_id = 0
-admin_key = ''
+robots = [
+    (0, 's3krit'),
+    (1, 'priv4te'),
+]

@@ -13,25 +13,12 @@ class BaseKeyworder(object):
     def __init__(self):
         self._br = Browser()
 
-    def _get_word_id(self, gag_id, word_str):
+    def _add_recomm(self, gag_id, word_str, user_id, user_key):
         args = {
             'gag_id': gag_id,
-            'user_id': config.admin_id,
-            'valid_key': config.admin_key,
             'word_str': word_str,
-        }
-        url = 'http://disa.csie.org:5566/lookup/recomm/id/?' + urllib.urlencode(args)
-        content = self._br._get_page_content(url)
-        result = json.loads(content)
-        assert result['status'] == 'OKAY'
-        return result['respond']['id']
-
-    def _add_recomm(self, gag_id, word_id):
-        args = {
-            'gag_id': gag_id,
-            'user_id': config.admin_id,
-            'valid_key': config.admin_key,
-            'word_id': word_id,
+            'user_id': user_id,
+            'valid_key': user_key,
         }
         url = 'http://disa.csie.org:5566/lookup/explain/query/?' + urllib.urlencode(args)
         content = self._br._get_page_content(url)
@@ -39,10 +26,9 @@ class BaseKeyworder(object):
         return result['status'] == 'OKAY'
 
     def _add_keyword(self, gag_id, keyword):
-        word_id = self._get_word_id(gag_id, keyword)
-        assert word_id
-        success = self._add_recomm(gag_id, word_id)
-        assert success
+        for robot in config.robots:
+            success = self._add_recomm(gag_id, keyword, robot[0], robot[1])
+            assert success
 
 class MemeKeyworder(BaseKeyworder):
     def __init__(self):
